@@ -34,7 +34,7 @@ non-alphabet characters and it isn't case sensitive.
 
 Let's try to decrypt:
 
-    >>> python3 decrypt_polycipher.py -i ihaveadream_encrypted.txt -o ihaveadream_decrypted.txt
+    $ python3 decrypt_polycipher.py -i ihaveadream_encrypted.txt -o ihaveadream_decrypted.txt
     INFO: Getting encrypted text from ihaveadream_encrypted.txt
     INFO: Periods guessed using Kasiski's Method [2, 3, 6, 4, 12]
     INFO: Period with closest IC to English IC: 12
@@ -65,7 +65,7 @@ We encrypt it using Vigenère's cipher with the key ROY and we obtain:
 
 If we try the automatic decryption:
 
-    >>> python3 decrypt_polycipher.py
+    $ python3 decrypt_polycipher.py
     Introduce the ciphertext: A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd. Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc. H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwätktq Ypsw. Pkd igghd edlwcsk lhda aw anki hf ihet, kazd ltzjh...hf...gzac. Sabd ld cat.
 
     INFO: Periods guessed using Kasiski's Method [5, 2, 3, 4, 6]
@@ -75,15 +75,14 @@ If we try the automatic decryption:
     INFO: Key: RRY
     INFO: Decrypted text: i'se sben qhikgs vou meomle touidn'q beiiese. aqtazk seipp on cirb ofc thb shlulaer lf ooiok. i wxtceed z-bexms dliqteo in qhe aarh nexr tee txnneÄbsuy gqae. qsl jooil metedas mplb ie bvsj pn jpmu, sial tuhri...pn...hhid. aicl te kiu.
 
-But we can guess that the beggining must be *I've*, so we have to change the second letter.
+It failed. However, we can guess that the beggining must be *I've*, so we have to change the second letter.
 
-If the letter *K* from the ciphertext correspond to the letter *V* in the plainletter:
-
-    Enc('V') = K    ==>     Enc('E') = T
+If the letter *K* from the ciphertext correspond to the letter *V* in the plainletter,
+the letter *E* must be encrypted to *T*.
 
 We add the argument *--manual** to interact with the decryption:
 
-    python3 decrypt_polycipher.py -m
+    $ python3 decrypt_polycipher.py -m
     Introduce the ciphertext: A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd. Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc. H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwätktq Ypsw. Pkd igghd edlwcsk lhda aw anki hf ihet, kazd ltzjh...hf...gzac. Sabd ld cat.
 
     INFO: Periods guessed using Kasiski's Method [5, 2, 3, 4, 6]
@@ -113,9 +112,8 @@ We add the argument *--manual** to interact with the decryption:
 
     Try another period [y/N]: N
 
-
-
-...
+We can see now why the automatic mode failed. The letter which *E* must be encrypted to
+usually is the most common letter in the subsequence but in this case that doesn't applied.
 
 ## Support
 
