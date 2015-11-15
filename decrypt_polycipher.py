@@ -15,7 +15,7 @@ from math import gcd
 def cleanText(text):
     """ Removes the punctuation symbol and whitespaces from text """
     cleantext = text
-    chars_to_removed = string.punctuation + string.whitespace
+    chars_to_removed = string.punctuation + string.whitespace + string.digits
     for c in chars_to_removed:
         cleantext = cleantext.replace(c,'')
     return cleantext
@@ -138,17 +138,16 @@ def guessPeriod(periods_with_occurrences,period_closest_english_ic,period_closes
 
     periods_with_confidence = []
     for period,occurrences in periods_with_occurrences:
-        confidence = 90*occurrences/total_occurrences
+        confidence = 70*occurrences/total_occurrences
         periods_with_confidence.append( [period,confidence] )
     log.debug('(step=1) Periods with confidence: %s', periods_with_confidence)
 
     pos_element_closest = elementClosestToValue(periods, period_closest_english_ic)
-    periods_with_confidence[pos_element_closest][1] += 5
-    periods_with_confidence.sort(key=itemgetter(1),reverse=True)
+    periods_with_confidence[pos_element_closest][1] += 15
     log.debug('(step=2) Periods with confidence: %s', periods_with_confidence)
 
     pos_element_closest = elementClosestToValue(periods, period_closest_ciphertext_ic)
-    periods_with_confidence[pos_element_closest][1] += 5
+    periods_with_confidence[pos_element_closest][1] += 15
     periods_with_confidence.sort(key=itemgetter(1),reverse=True)
     log.debug('(step=3) Periods with confidence: %s', periods_with_confidence)
 
@@ -249,11 +248,12 @@ if __name__ == '__main__':
         log.basicConfig(format="%(levelname)s: %(message)s", level=log.INFO)
 
     if args.input_file:
-        log.info('Getting encrypted text from %s.',args.input_file)
+        log.info('Getting encrypted text from %s',args.input_file)
         with open(args.input_file) as filehandler:
             ciphertext = filehandler.read()
     else:
         ciphertext = input("Introduce the ciphertext: ")
+        print(len(ciphertext))
         print()
 
     log.debug('Ciphertext: %s',ciphertext)
@@ -284,8 +284,8 @@ if __name__ == '__main__':
 
     for k,v in all_possible_periods: # remove possible periods that have only one occurrence
         if v == 1:
-            del all_possible_periods[k]
-    log.debug('Periods with more occurrences as a factor of distances of ngrams: %s...',all_possible_periods)
+            all_possible_periods.remove((k,v))
+    log.debug('Periods with more occurrences as a factor of distances of ngrams: %s',all_possible_periods)
 
     all_possible_periods_without_occurrences = [a_p_p[0] for a_p_p in all_possible_periods]
     log.info("Periods guessed using Kasiski's Method %s",all_possible_periods_without_occurrences)
@@ -336,11 +336,11 @@ if __name__ == '__main__':
             if not option.upper() == 'Y':
                 break
 
+    log.info('Key: %s',key)
     if args.output_file:
         log.info('Saving decrypted text in %s.',args.output_file)
         with open(args.output_file,'w') as filehandler:
             filehandler.write('Key: ' + key)
             filehandler.write('\nPlaintext: ' + plaintext)
     else:
-        log.info('Key: %s',key)
         log.info('Decrypted text: %s',plaintext)
