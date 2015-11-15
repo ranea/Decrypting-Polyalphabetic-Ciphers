@@ -75,13 +75,13 @@ If we try the automatic decryption:
     INFO: Key: RRY
     INFO: Decrypted text: i'se sben qhikgs vou meomle touidn'q beiiese. aqtazk seipp on cirb ofc thb shlulaer lf ooiok. i wxtceed z-bexms dliqteo in qhe aarh nexr tee txnneÄbsuy gqae. qsl jooil metedas mplb ie bvsj pn jpmu, sial tuhri...pn...hhid. aicl te kiu.
 
-It failed. However, we can guess that the beggining must be *I've*, so we have to change the second
+It failed. However, we can guess that the beginning must be *I've*, so we have to change the second
 monoalphabetic cipher (the second letter of the key).
 
-If the letter *K* from the ciphertext correspond to the letter *V* in the plainletter,
+If the letter *K* from the ciphertext correspond to the letter *V* in the plaintext,
 the letter *E* must be encrypted to *T*.
 
-We add the argument *--manual** to interact with the decryption:
+We add the argument *--manual* to interact with the decryption:
 
     $ python3 decrypt_polycipher.py -m
     Introduce the ciphertext: A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd. Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc. H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwätktq Ypsw. Pkd igghd edlwcsk lhda aw anki hf ihet, kazd ltzjh...hf...gzac. Sabd ld cat.
