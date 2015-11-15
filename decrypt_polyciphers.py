@@ -11,7 +11,6 @@ from math import gcd
 
 # TODO
 #   finish decryptText, guessPeriod description
-#   clean KasiskiMethod function
 #   how many ngrams and periods do i have to take in kassiski methods?
 #   implement guessPeriod
 #   implement manual analysis in decryptText and guessPeriod
@@ -26,12 +25,12 @@ def cleanText(text):
     return cleantext
 
 def getNgrams(text):
-    """ Gets the n-grams that are repetead in the text.
+    """ Gets the n-grams that are repeated in the text.
     The output is a list of list where each (sub)list
     contains all the grams of the same length
-    that are repetead and its occurrences.
+    that are repeated and its occcurrences.
     The list and each (sub)list are sorted in reversed order
-    with respect to the length and the number of occurrences.
+    with respect to the length and the number of occcurrences.
 
     Example:
         >>> getNgrams("abcxabc)
@@ -43,8 +42,7 @@ def getNgrams(text):
         for i in range(len(text)-j+1):
             currentgram = text[i:i+j]
             jgrams[currentgram] = jgrams.get(currentgram,0) + 1
-        # removes the jgrams that aren't repetead
-        for k,v in list(jgrams.items()):
+        for k,v in list(jgrams.items()): # removes the jgrams that aren't repeated
             if v == 1:
                 del jgrams[k]
         if jgrams:
@@ -56,17 +54,16 @@ def getNgrams(text):
 
 def KasiskiMethod(text, ngrams):
     """Calculates the possible periods of a polyalphabetic substitution ciphers
-    usign Kasiski's method.
+    using Kasiski's method.
     """
     distances = []
     possible_periods = []
-
     for ngram in ngrams:
-        first_occurrence = text.find(ngram)
-        second_occurrence = text.find(ngram,first_occurrence+1)
-        distance = second_occurrence-first_occurrence
+        first_occcurrence = text.find(ngram)
+        second_occcurrence = text.find(ngram,first_occcurrence+1)
+        distance = second_occcurrence-first_occcurrence
         distances.append(distance)
-        log.debug('Distance of %s: %s-%s=%s',ngram,second_occurrence,first_occurrence,distance)
+        log.debug('Distance of %s: %s-%s=%s',ngram,second_occcurrence,first_occcurrence,distance)
 
         for possible_period in range(2,distance+1):
             if distance % possible_period == 0:
@@ -106,28 +103,49 @@ def averageIndexOfCoincidece(text,period):
 
     return float("{0:.6f}".format(avg_ic))
 
-def guessPeriod(periods_with_ocurrences,period_closest_english_ic,period_closest_ciphertext_ic):
-    periods = [period for period,_ in periods_with_ocurrences]
-    ocurrences = [ocurrences for _,ocurrences in periods_with_ocurrences]
-    total_ocurrences = sum(ocurrences)
-    log.debug('Total ocurrences: %s',total_ocurrences)
+def elementClosestToValue(elements, value, returns_position=True):
+    """ Return the element (or the position in the list) in elements that
+    is closest to value. If more than one element are at the minimum distance
+    to value, it returns the first one. If returns_position=False, it returns
+    the element.
+
+    Example:
+        >>> elementClosestToValue([1,2,3], 1.8)
+        2
+        >>> elementClosestToValue([1,2,4,6], 3)
+        2
+    """
+    distances_repect_value = [abs(element-value) for element in elements]
+    min_value = min(distances_repect_value)
+    min_index = distances_repect_value.index(min_value)
+
+    if returns_position:
+        return min_index
+    else:
+        return elements[min_index]
+
+
+def guessPeriod(periods_with_occurrences,period_closest_english_ic,period_closest_ciphertext_ic):
+    """ DESCRIPTION """
+    periods = [period for period,_ in periods_with_occurrences]
+    occurrences = [occurrences for _,occurrences in periods_with_occurrences]
+    total_occurrences = sum(occurrences)
+    log.debug('Total occcurrences: %s',total_occurrences)
 
     periods_with_confidence = []
-    for period,ocurrences in periods_with_ocurrences:
-        confidence = 90*ocurrences/total_ocurrences #"{0:.2f}%".format(90*ocurrences/total_ocurrences)
+    for period,occurrences in periods_with_occurrences:
+        confidence = 90*occurrences/total_occurrences #"{0:.2f}%".format(90*occurrences/total_occurrences)
         periods_with_confidence.append( [period,confidence] )
     log.debug('(step=1) Periods with confidence: %s', periods_with_confidence)
 
-    distances_respect_period_closest_english_ic = [float("{0:.6f}".format(abs(period_closest_english_ic-period))) for period in periods]
-    min_value = min(distances_respect_period_closest_english_ic)
-    min_index = distances_respect_period_closest_english_ic.index(min_value)
-    periods_with_confidence[min_index][1] += 5
+    pos_element_closest = elementClosestToValue(periods, period_closest_english_ic)
+    periods_with_confidence[pos_element_closest][1] += 5
+    periods_with_confidence.sort(key=itemgetter(1),reverse=True)
     log.debug('(step=2) Periods with confidence: %s', periods_with_confidence)
 
-    distances_respect_period_closest_ciphertext_ic = [float("{0:.6f}".format(abs(period_closest_ciphertext_ic-period))) for period in periods]
-    min_value = min(distances_respect_period_closest_ciphertext_ic)
-    min_index = distances_respect_period_closest_ciphertext_ic.index(min_value)
-    periods_with_confidence[min_index][1] += 5
+    pos_element_closest = elementClosestToValue(periods, period_closest_ciphertext_ic)
+    periods_with_confidence[pos_element_closest][1] += 5
+    periods_with_confidence.sort(key=itemgetter(1),reverse=True)
     log.debug('(step=3) Periods with confidence: %s', periods_with_confidence)
 
     periods_with_confidence = [(period,"{0:.2f}%".format(confidence)) for period,confidence in periods_with_confidence]
@@ -153,7 +171,7 @@ def decryptText(text,period):
 
         log.debug('Encrypted subsequence %s: %s',index,subseq)
         log.debug('Most common letters: %s', most_common_letters)
-        log.debug('Supossing Enc(E) = %s', most_common_letter)
+        log.debug('Supposing Enc(E) = %s', most_common_letter)
 
         ## cipher = vigener
         offset = (ord(most_common_letter) - ord('E'))%len(alphabet)
@@ -175,8 +193,8 @@ def decryptText(text,period):
         ## cipher = substitution
         # most_common_english_letter = "etrinoa"
         # n = len(most_common_english_letter)
-        # for cipherletter_with_ocurrences,plainletter in zip(frequency_of_letters.most_common(n),most_common_english_letter):
-        #     subseq = subseq.replace(cipherletter_with_ocurrences[0] , plainletter)
+        # for cipherletter_with_occurrences,plainletter in zip(frequency_of_letters.most_common(n),most_common_english_letter):
+        #     subseq = subseq.replace(cipherletter_with_occurrences[0] , plainletter)
 
         log.debug('Decrypted subsequence %s: %s',index,subseq_deciphered)
         subsequences_decrypted[index] = subseq_deciphered
@@ -235,11 +253,11 @@ if __name__ == '__main__':
 
     all_possible_periods = []
     for jgrams in ngrams:
-        jgrams_without_ocurrences = [jgram[0] for jgram in jgrams]
-        possible_periods, distances = KasiskiMethod(clean_ciphertext,jgrams_without_ocurrences)
+        jgrams_without_occurrences = [jgram[0] for jgram in jgrams]
+        possible_periods, distances = KasiskiMethod(clean_ciphertext,jgrams_without_occurrences)
         all_possible_periods +=possible_periods
 
-        j = len(jgrams_without_ocurrences[0])
+        j = len(jgrams_without_occurrences[0])
         log.debug('(n-grams, n=%s) Distances: %s',j,distances)
         log.debug('(n-grams, n=%s) Possible periods: %s',j,possible_periods)
 
@@ -248,16 +266,16 @@ if __name__ == '__main__':
         log.warning("Kasiski's method failed: insufficient ngrams. Aborting...")
         sys.exit(1)
 
-    for k,v in all_possible_periods: # remove possible periods that have only one occurence
+    for k,v in all_possible_periods: # remove possible periods that have only one occurrence
         if v == 1:
             del all_possible_periods[k]
     log.debug('Periods with more occurrences as a factor of distances of ngrams: %s...',all_possible_periods)
 
-    all_possible_periods_without_ocurrences = [a_p_p[0] for a_p_p in all_possible_periods]
-    log.info("Periods guessed usign Kasiski's Method %s",all_possible_periods_without_ocurrences)
+    all_possible_periods_without_occurrences = [a_p_p[0] for a_p_p in all_possible_periods]
+    log.info("Periods guessed using Kasiski's Method %s",all_possible_periods_without_occurrences)
 
     avg_ics = []
-    for period in all_possible_periods_without_ocurrences:
+    for period in all_possible_periods_without_occurrences:
         avg_ics.append(averageIndexOfCoincidece(clean_ciphertext,period))
     log.debug('Average IC values: %s',avg_ics)
 
@@ -265,10 +283,10 @@ if __name__ == '__main__':
     distances_respect_english_ic = [float("{0:.6f}".format(abs(english_ic-avg_ic))) for avg_ic in avg_ics]
     min_value = min(distances_respect_english_ic)
     min_index = distances_respect_english_ic.index(min_value)
-    period_closest_english_ic = all_possible_periods_without_ocurrences[min_index]
+    period_closest_english_ic = all_possible_periods_without_occurrences[min_index]
     log.debug('English IC: %s',english_ic)
-    log.debug('Distances respect to english IC: %s',distances_respect_english_ic)
-    log.info('Period with closest IC to english IC: %s',period_closest_english_ic)
+    log.debug('Distances respect to English IC: %s',distances_respect_english_ic)
+    log.info('Period with closest IC to English IC: %s',period_closest_english_ic)
 
     ciphertext_ic = indexOfCoincidence(clean_ciphertext)
     periods_ic = [0.0066,0.0520,0.0473,0.0450,0.0436,0.0427,0.0420,0.0415,0.0411,0.0408,
@@ -283,7 +301,7 @@ if __name__ == '__main__':
     log.info('Period with closest IC to ciphertext IC: %s', period_closest_ciphertext_ic)
 
     periods_with_confidence = guessPeriod(all_possible_periods,period_closest_english_ic,period_closest_ciphertext_ic)
-    log.info('Guessed periods: %s', periods_with_confidence)
+    log.info('Periods with confidence: %s', periods_with_confidence)
 
     if not args.manual:
         guessed_period = periods_with_confidence[0][0]
