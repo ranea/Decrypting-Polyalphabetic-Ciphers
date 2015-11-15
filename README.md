@@ -1,6 +1,6 @@
 # Decrypting-polyalphabetic-ciphers
 
-[screenshot](https://raw.githubusercontent.com/ranea/Decrypting-polyalphabetic-ciphers/master/screenshot.png)
+![screenshot](https://raw.githubusercontent.com/ranea/Decrypting-polyalphabetic-ciphers/master/screenshot.png)
 
 Decrypting polyalphabetic ciphers using Kasiski's Method and Index of Coincidence
 

@@ -243,9 +243,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not args.manual and not args.verbosity and not args.input_file and not args.output_file:
-        banner = "Note: if you want to read/write from/to a file, print more information or interact  \
-        \nwith the decryption, use command-line arguments. For more information, type: \
-        \n\n\tpython3 " + sys.argv[0] + " --help\n"
+        banner = "Note: if you want to read/write from/to a file, print more information or interact "   \
+            + "with the decryption, use command-line arguments. For more information, type:"    \
+            + "\n\n\tpython3 " + sys.argv[0] + " --help\n"
         print(banner)
 
     if args.verbosity:
