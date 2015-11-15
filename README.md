@@ -43,7 +43,7 @@ Let's try to decrypt:
     INFO: Key: LUTHER
     INFO: Saving decrypted text in ihaveadream_decrypted.txt.
 
-We have obtained the correct key and the decrypted text is in the file ihaveadream_decrypted.txt.
+We have obtained the correct key and the decrypted text is in the file *ihaveadream_decrypted.txt*.
 
 ### Manual attack
 
@@ -75,7 +75,8 @@ If we try the automatic decryption:
     INFO: Key: RRY
     INFO: Decrypted text: i'se sben qhikgs vou meomle touidn'q beiiese. aqtazk seipp on cirb ofc thb shlulaer lf ooiok. i wxtceed z-bexms dliqteo in qhe aarh nexr tee txnneÄbsuy gqae. qsl jooil metedas mplb ie bvsj pn jpmu, sial tuhri...pn...hhid. aicl te kiu.
 
-It failed. However, we can guess that the beggining must be *I've*, so we have to change the second letter.
+It failed. However, we can guess that the beggining must be *I've*, so we have to change the second
+monoalphabetic cipher (the second letter of the key).
 
 If the letter *K* from the ciphertext correspond to the letter *V* in the plainletter,
 the letter *E* must be encrypted to *T*.
