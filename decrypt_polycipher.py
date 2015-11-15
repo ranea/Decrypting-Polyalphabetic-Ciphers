@@ -11,14 +11,28 @@ from math import gcd
 
 ## TODO
 # only vigenere cipher supported -> generalize
+# fix decrypting of 1984
 
 def cleanText(text):
-    """ Removes the punctuation symbol and whitespaces from text """
+    """ Removes the punctuation symbol, digits and whitespaces from text """
     cleantext = text
-    chars_to_removed = string.punctuation + string.whitespace + string.digits
+    chars_to_removed = string.punctuation + string.whitespace + string.digits + '—'
     for c in chars_to_removed:
         cleantext = cleantext.replace(c,'')
     return cleantext
+
+def rebuildText(originaltext,newtext):
+    """ Adds the punctuation symbol, whitespaces and digits from originaltext to newtext
+
+    Example
+        rebuildText('ifmmp1!','hello')
+        hello!
+    """
+    rebuilt_text = list(newtext)
+    for pos,letter in enumerate(originaltext):
+        if letter in string.punctuation or letter in string.whitespace or letter in string.digits:
+            rebuilt_text.insert(pos,letter)
+    return ''.join(rebuilt_text)
 
 def getNgrams(text):
     """ Gets the n-grams that are repeated in the text.
@@ -181,7 +195,7 @@ def decryptText(text,period,manual=False):
         if manual:
             log.info('Subsequence %s. Most common letters: %s',index,most_common_letters)
             print()
-            encrypted_e = input("Letter used to encrypt E: ").upper()
+            encrypted_e = input("Encryption of E: ").upper()
             print()
         else:
             encrypted_e = most_common_letter
@@ -191,7 +205,7 @@ def decryptText(text,period,manual=False):
         log.debug('Supposing Enc(E) = %s', encrypted_e)
 
         ## cipher = vigener
-        keyletter = chr(ord('A')+offset)
+        keyletter = chr(ord('A')+offset-1)
         if manual:
              log.info('Subsequence %s. Key: %s <-> %s', index, keyletter, offset)
         else:
@@ -259,6 +273,9 @@ if __name__ == '__main__':
     log.debug('Ciphertext: %s',ciphertext)
     clean_ciphertext = cleanText(ciphertext).upper()
     log.debug('Clean ciphertext: %s',clean_ciphertext)
+
+    with open('cleantext.txt1','w') as filehandler:
+        filehandler.write(clean_ciphertext)
 
     ngrams = getNgrams(clean_ciphertext)
     log.debug('n-grams: %s',ngrams)
@@ -336,11 +353,14 @@ if __name__ == '__main__':
             if not option.upper() == 'Y':
                 break
 
+    plaintext = rebuildText(ciphertext,plaintext)
+
     log.info('Key: %s',key)
     if args.output_file:
         log.info('Saving decrypted text in %s.',args.output_file)
         with open(args.output_file,'w') as filehandler:
             filehandler.write('Key: ' + key)
-            filehandler.write('\nPlaintext: ' + plaintext)
+            filehandler.write('\n==========\n')
+            filehandler.write(plaintext)
     else:
         log.info('Decrypted text: %s',plaintext)
