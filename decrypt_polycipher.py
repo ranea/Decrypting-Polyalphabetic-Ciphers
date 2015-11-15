@@ -157,11 +157,11 @@ def guessPeriod(periods_with_occurrences,period_closest_english_ic,period_closes
     log.debug('(step=1) Periods with confidence: %s', periods_with_confidence)
 
     pos_element_closest = elementClosestToValue(periods, period_closest_english_ic)
-    periods_with_confidence[pos_element_closest][1] += 15
+    periods_with_confidence[pos_element_closest][1] += 20
     log.debug('(step=2) Periods with confidence: %s', periods_with_confidence)
 
     pos_element_closest = elementClosestToValue(periods, period_closest_ciphertext_ic)
-    periods_with_confidence[pos_element_closest][1] += 15
+    periods_with_confidence[pos_element_closest][1] += 10
     periods_with_confidence.sort(key=itemgetter(1),reverse=True)
     log.debug('(step=3) Periods with confidence: %s', periods_with_confidence)
 
@@ -267,7 +267,6 @@ if __name__ == '__main__':
             ciphertext = filehandler.read()
     else:
         ciphertext = input("Introduce the ciphertext: ")
-        print(len(ciphertext))
         print()
 
     log.debug('Ciphertext: %s',ciphertext)
@@ -336,6 +335,7 @@ if __name__ == '__main__':
     if not args.manual:
         guessed_period = periods_with_confidence[0][0]
         key, plaintext = decryptText(clean_ciphertext,guessed_period)
+        plaintext = rebuildText(ciphertext,plaintext)
         log.debug('Key: %s',key)
         log.debug('Decrypted text: %s',plaintext)
     else:
@@ -344,6 +344,7 @@ if __name__ == '__main__':
             guessed_period = int(input("Introduce period: "))
             print()
             key, plaintext = decryptText(clean_ciphertext,guessed_period,manual=True)
+            plaintext = rebuildText(ciphertext,plaintext)
 
             log.info('Key: %s',key)
             log.info('Decrypted text: %s',plaintext)
@@ -352,8 +353,6 @@ if __name__ == '__main__':
             option = input("Try another period [y/N]: ")
             if not option.upper() == 'Y':
                 break
-
-    plaintext = rebuildText(ciphertext,plaintext)
 
     log.info('Key: %s',key)
     if args.output_file:
