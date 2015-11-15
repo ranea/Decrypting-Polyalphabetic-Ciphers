@@ -319,8 +319,8 @@ if __name__ == '__main__':
     if not args.manual:
         guessed_period = periods_with_confidence[0][0]
         key, plaintext = decryptText(clean_ciphertext,guessed_period)
-        log.info('Key: %s',key)
-        log.info('Decrypted text: %s',plaintext)
+        log.debug('Key: %s',key)
+        log.debug('Decrypted text: %s',plaintext)
     else:
         while True:
             print()
@@ -339,5 +339,8 @@ if __name__ == '__main__':
     if args.output_file:
         log.info('Saving decrypted text in %s.',args.output_file)
         with open(args.output_file,'w') as filehandler:
-            filehandler.write(key)
-            filehandler.write(plaintext)
+            filehandler.write('Key: ' + key)
+            filehandler.write('\nPlaintext: ' + plaintext)
+    else:
+        log.info('Key: %s',key)
+        log.info('Decrypted text: %s',plaintext)
