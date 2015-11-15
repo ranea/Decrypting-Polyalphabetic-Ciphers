@@ -10,8 +10,7 @@ from collections import Counter
 from math import gcd
 
 ## TODO
-# only vigenere cipher supported -> generalize
-# fix decrypting of 1984
+# only vigenere cipher and english supported -> generalize
 
 def cleanText(text):
     """ Removes the punctuation symbol, digits and whitespaces from text """
@@ -216,7 +215,7 @@ def decryptText(text,period,manual=False):
             log.debug('Enc(%s) = %s',alphabet[(pos-offset)%len(alphabet)],letter)
             subseq_deciphered = subseq_deciphered.replace(letter,alphabet[(pos-offset)%len(alphabet)].lower())
 
-        ## cipher = substitution
+        ## cipher = monoalphabetic substitution
         # most_common_english_letter = "etrinoa"
         # n = len(most_common_english_letter)
         # for cipherletter_with_occurrences,plainletter in zip(frequency_of_letters.most_common(n),most_common_english_letter):
@@ -298,7 +297,7 @@ if __name__ == '__main__':
         log.warning("Kasiski's method failed: insufficient ngrams. Aborting...")
         sys.exit(1)
 
-    for k,v in all_possible_periods: # remove possible periods that have only one occurrence
+    for k,v in all_possible_periods:
         if v == 1:
             all_possible_periods.remove((k,v))
     log.debug('Periods with more occurrences as a factor of distances of ngrams: %s',all_possible_periods)

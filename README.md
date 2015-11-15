@@ -118,5 +118,5 @@ usually is the most common letter in the subsequence but in this case that doesn
 
 ## Support
 
-Only English and Vigenère's cipher are supported.
+Only English plaintexts and Vigenère's cipher are supported.
 Soon other languages and polyalphabetic ciphers will be added.
