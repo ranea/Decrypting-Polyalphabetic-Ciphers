@@ -114,7 +114,7 @@ We add the argument *--manual* to interact with the decryption:
     Try another period [y/N]: N
 
 We can see now why the automatic mode failed. The letter which *E* must be encrypted to
-usually is the most common letter in the subsequence but in the case that doesn't applied.
+usually is the most common letter in the subsequence but in this case that doesn't applied.
 
 ## Support
 
