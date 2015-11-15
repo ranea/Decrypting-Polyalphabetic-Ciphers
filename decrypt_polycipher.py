@@ -9,12 +9,8 @@ import argparse
 from collections import Counter
 from math import gcd
 
-# TODO
-#   finish decryptText, guessPeriod description
-#   how many ngrams and periods do i have to take in kassiski methods?
-#   implement guessPeriod
-#   implement manual analysis in decryptText and guessPeriod
-#   clean decryptText
+## TODO
+# only vigenere cipher supported -> generalize
 
 def cleanText(text):
     """ Removes the punctuation symbol and whitespaces from text """
@@ -97,14 +93,14 @@ def averageIndexOfCoincidece(text,period):
         subsequences[pos%period].append(letter)
 
     for index,subseq in enumerate(subsequences):
-        log.debug('Subsequence %s: %s',index,''.join(subseq))
+        log.debug('(p=%s) subsequence %s: %s',period, index,''.join(subseq))
 
     avg_ic = sum( [indexOfCoincidence(subseq) for subseq in subsequences] )/period
 
     return float("{0:.6f}".format(avg_ic))
 
 def elementClosestToValue(elements, value, returns_position=True):
-    """ Return the element (or the position in the list) in elements that
+    """ Returns the element (or the position in the list) in elements that
     is closest to value. If more than one element are at the minimum distance
     to value, it returns the first one. If returns_position=False, it returns
     the element.
@@ -115,9 +111,12 @@ def elementClosestToValue(elements, value, returns_position=True):
         >>> elementClosestToValue([1,2,4,6], 3)
         2
     """
-    distances_repect_value = [abs(element-value) for element in elements]
+    distances_repect_value = ["{0:.6f}".format(abs(element-value)) for element in elements]
     min_value = min(distances_repect_value)
     min_index = distances_repect_value.index(min_value)
+
+    log.debug('Distances respect value: %s',distances_repect_value)
+    log.debug('Element closest to %s is elements[%s]=%s',value,min_index,elements[min_index])
 
     if returns_position:
         return min_index
@@ -126,7 +125,12 @@ def elementClosestToValue(elements, value, returns_position=True):
 
 
 def guessPeriod(periods_with_occurrences,period_closest_english_ic,period_closest_ciphertext_ic):
-    """ DESCRIPTION """
+    """ Calculates the confidence/probability of each period of having been used for
+    encrypt the text. It uses the periods obtained with the Kasiski method, the
+    period closest to the English ic and the period closest to the ciphertext ic
+    to compute the confidence.
+    """
+
     periods = [period for period,_ in periods_with_occurrences]
     occurrences = [occurrences for _,occurrences in periods_with_occurrences]
     total_occurrences = sum(occurrences)
@@ -134,7 +138,7 @@ def guessPeriod(periods_with_occurrences,period_closest_english_ic,period_closes
 
     periods_with_confidence = []
     for period,occurrences in periods_with_occurrences:
-        confidence = 90*occurrences/total_occurrences #"{0:.2f}%".format(90*occurrences/total_occurrences)
+        confidence = 90*occurrences/total_occurrences
         periods_with_confidence.append( [period,confidence] )
     log.debug('(step=1) Periods with confidence: %s', periods_with_confidence)
 
@@ -152,8 +156,12 @@ def guessPeriod(periods_with_occurrences,period_closest_english_ic,period_closes
 
     return periods_with_confidence
 
-def decryptText(text,period):
-    """ DESCRIPTION """
+def decryptText(text,period,manual=False):
+    """ Decrypts the text for a given period. For each subsequence
+    splited usign the period, the most common letter
+    is replaced with the letter E and the key is obtained
+    (supposing the cipher is Vigenère's)
+    """
 
     subsequences = [[] for i in range(period)]
     for pos,letter in enumerate(text):
@@ -170,20 +178,25 @@ def decryptText(text,period):
         most_common_letter = most_common_letters[0][0]
 
         log.debug('Encrypted subsequence %s: %s',index,subseq)
-        log.debug('Most common letters: %s', most_common_letters)
-        log.debug('Supposing Enc(E) = %s', most_common_letter)
+
+        if manual:
+            log.info('Subsequence %s. Most common letters: %s',index,most_common_letters)
+            print()
+            encrypted_e = input("Letter used to encrypt E: ").upper()
+            print()
+        else:
+            encrypted_e = most_common_letter
+            log.debug('(subsequence=%s) most common letters: %s',index,most_common_letters)
+
+        offset = (ord(encrypted_e) - ord('E'))%len(alphabet)
+        log.debug('Supposing Enc(E) = %s', encrypted_e)
 
         ## cipher = vigener
-        offset = (ord(most_common_letter) - ord('E'))%len(alphabet)
-        # if index == 3:
-        #     log.debug('###########################################################')
-        #     offset = (ord(most_common_letter) - ord('T'))%len(alphabet)
-        # if index == 1:
-        #     log.debug('###########################################################')
-        #     offset = (ord(most_common_letter) - ord('O'))%len(alphabet)
         keyletter = chr(ord('A')+offset)
-
-        log.debug('Keyletter: %s <-> %s', keyletter, offset)
+        if manual:
+             log.info('Subsequence %s. Key: %s <-> %s', index, keyletter, offset)
+        else:
+            log.debug('Keyletter: %s <-> %s', keyletter, offset)
 
         subseq_deciphered = subseq
         for pos, letter in enumerate(alphabet):
@@ -209,10 +222,11 @@ def decryptText(text,period):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="decrypt a Vigenère ciphered text")
+    parser = argparse.ArgumentParser(description="decrypt a polyalphabetic substitution ciphered text")
     parser.add_argument("-m", "--manual", action="store_true", help="interacts with the user")
     parser.add_argument("-i", "--input-file", type=str, help="the input file with the encrypted text")
     parser.add_argument("-o","--output-file", type=str, help="the output file with the decrypted text")
+    parser.add_argument("-nc", "--no-colors", action="store_true", help="don't color the output")
     parser.add_argument("-v", "--verbosity", action="store_true", help="increase output verbosity")
     args = parser.parse_args()
 
@@ -223,19 +237,21 @@ if __name__ == '__main__':
         print(banner)
 
     if args.verbosity:
-        log.addLevelName( log.INFO, "\033[1;36m%s\033[1;0m" % log.getLevelName(log.INFO))
-        log.addLevelName( log.WARNING, "\033[1;31m%s\033[1;0m" % log.getLevelName(log.WARNING))
-        log.addLevelName( log.DEBUG, "\033[1;33m%s\033[1;0m" % log.getLevelName(log.DEBUG))
+        if not args.no_colors:
+            log.addLevelName( log.INFO, "\033[1;36m%s\033[1;0m" % log.getLevelName(log.INFO))
+            log.addLevelName( log.WARNING, "\033[1;31m%s\033[1;0m" % log.getLevelName(log.WARNING))
+            log.addLevelName( log.DEBUG, "\033[1;33m%s\033[1;0m" % log.getLevelName(log.DEBUG))
         log.basicConfig(format="%(levelname)s: %(message)s", level=log.DEBUG)
     else:
-        log.addLevelName( log.INFO, "\033[1;36m%s\033[1;0m" % log.getLevelName(log.INFO))
-        log.addLevelName( log.WARNING, "\033[1;31m%s\033[1;0m" % log.getLevelName(log.WARNING))
+        if not args.no_colors:
+            log.addLevelName( log.INFO, "\033[1;36m%s\033[1;0m" % log.getLevelName(log.INFO))
+            log.addLevelName( log.WARNING, "\033[1;31m%s\033[1;0m" % log.getLevelName(log.WARNING))
         log.basicConfig(format="%(levelname)s: %(message)s", level=log.INFO)
 
     if args.input_file:
+        log.info('Getting encrypted text from %s.',args.input_file)
         with open(args.input_file) as filehandler:
             ciphertext = filehandler.read()
-            log.debug('Ciphertext: %s',ciphertext)
     else:
         ciphertext = input("Introduce the ciphertext: ")
         print()
@@ -280,24 +296,21 @@ if __name__ == '__main__':
     log.debug('Average IC values: %s',avg_ics)
 
     english_ic = 0.66895
-    distances_respect_english_ic = [float("{0:.6f}".format(abs(english_ic-avg_ic))) for avg_ic in avg_ics]
-    min_value = min(distances_respect_english_ic)
-    min_index = distances_respect_english_ic.index(min_value)
-    period_closest_english_ic = all_possible_periods_without_occurrences[min_index]
     log.debug('English IC: %s',english_ic)
-    log.debug('Distances respect to English IC: %s',distances_respect_english_ic)
+
+    pos_element_closest = elementClosestToValue(avg_ics, english_ic)
+    period_closest_english_ic = all_possible_periods_without_occurrences[pos_element_closest]
     log.info('Period with closest IC to English IC: %s',period_closest_english_ic)
 
     ciphertext_ic = indexOfCoincidence(clean_ciphertext)
+    log.debug('Ciphertext IC: %s',ciphertext_ic)
+
     periods_ic = [0.0066,0.0520,0.0473,0.0450,0.0436,0.0427,0.0420,0.0415,0.0411,0.0408,
         0.0405,0.0403,0.0402,0.0400,0.0399,0.0397,0.0396,0.0396,0.0395,0.0394 ]
-    distances_respect_periods_ic = [float("{0:.6f}".format(abs(ciphertext_ic-p_ic))) for p_ic in periods_ic]
-    min_value = min(distances_respect_periods_ic)
-    min_index = distances_respect_periods_ic.index(min_value)
-    period_closest_ciphertext_ic = min_index+1
-    log.debug('Ciphertext IC: %s',ciphertext_ic)
     log.debug('Periods IC: %s',periods_ic)
-    log.debug('Distances respect to periods IC: %s',distances_respect_english_ic)
+
+    pos_element_closest = elementClosestToValue(periods_ic, ciphertext_ic)
+    period_closest_ciphertext_ic = pos_element_closest+1
     log.info('Period with closest IC to ciphertext IC: %s', period_closest_ciphertext_ic)
 
     periods_with_confidence = guessPeriod(all_possible_periods,period_closest_english_ic,period_closest_ciphertext_ic)
@@ -313,7 +326,7 @@ if __name__ == '__main__':
             print()
             guessed_period = int(input("Introduce period: "))
             print()
-            key, plaintext = decryptText(clean_ciphertext,guessed_period)
+            key, plaintext = decryptText(clean_ciphertext,guessed_period,manual=True)
 
             log.info('Key: %s',key)
             log.info('Decrypted text: %s',plaintext)
@@ -324,6 +337,7 @@ if __name__ == '__main__':
                 break
 
     if args.output_file:
-        with open(args.input_file,'w') as filehandler:
+        log.info('Saving decrypted text in %s.',args.output_file)
+        with open(args.output_file,'w') as filehandler:
             filehandler.write(key)
             filehandler.write(plaintext)
