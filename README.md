@@ -53,7 +53,7 @@ Suppose we encrypt the monologue *Tears in Rain* from *Blade Runner*:
 
     I've seen things you people wouldn't believe.
     Attack ships on fire off the shoulder of Orion.
-    I watched C-beams glitter in the dark near the Tannhäuser Gate.
+    I watched C-beams glitter in the dark near the Tannhauser Gate.
     All those moments will be lost in time, like tears...in...rain.
     Time to die.
 
@@ -61,21 +61,26 @@ We encrypt it using Vigenère's cipher with the key ROY and we obtain:
 
     A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd.
     Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc.
-    H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwätktq Ypsw.
-    Pkd igghd edlwcsk lhda aw anki hf ihet, kazd ltzjh...hf...gzac.
-    Sabd ld cat.
+    H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwzmhdj Vzlt. 
+    Zda szdrw bnetmlh vaak tt kghs ac sabd, dxjw idsgr...ac...qsxm. 
+    Lxlw in vxd.
 
 If we try the automatic decryption:
 
     $ python3 decrypt_polycipher.py
-    Introduce the ciphertext: A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd. Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc. H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwätktq Ypsw. Pkd igghd edlwcsk lhda aw anki hf ihet, kazd ltzjh...hf...gzac. Sabd ld cat.
-
-    INFO: Periods guessed using Kasiski's Method [5, 2, 3, 4, 6]
+    Note: if you want to read/write from/to a file, print more information or interact with the decryption, use command-line arguments. For more information, type:
+    
+            python3 decrypt_polycipher.py --help
+    
+    Introduce the ciphertext: A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd. Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc. H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwzmhdj Vzlt. Zda szdrw bnetmlh vaak tt kghs ac sabd, dxjw idsgr...ac...qsxm. Lxlw in vxd.
+    
+    INFO: Periods guessed using Kasiski's Method [2, 3, 4, 5, 6]
     INFO: Period with closest IC to English IC: 3
-    INFO: Period with closest IC to ciphertext IC: 2
-    INFO: Periods with confidence: [(3, '30.77%'), (2, '26.15%'), (5, '21.54%'), (4, '10.77%'), (6, '10.77%')]
-    INFO: Key: RRY
-    INFO: Decrypted text: i'se sben qhikgs vou meomle touidn'q beiiese. aqtazk seipp on cirb ofc thb shlulaer lf ooiok. i wxtceed z-bexms dliqteo in qhe aarh nexr tee txnneÄbsuy gqae. qsl jooil metedas mplb ie bvsj pn jpmu, sial tuhri...pn...hhid. aicl te kiu.
+    INFO: Period with closest IC to ciphertext IC: 3
+    INFO: Periods with confidence: [(3, '41.67%'), (2, '23.33%'), (4, '11.67%'), (5, '11.67%'), (6, '11.67%')]
+    INFO: Key: RDY
+    INFO: Decrypted text: i'ge spen ehiygs jou aeoale houwdn'e bewiege. aetank ssipd on qirp ofq thp shzuloer zf ocioy. i wltcsed n-belms rlietec in ehe oarv nelr tse tlnnsauder ratp. alw thzse xompntd wiwl bp lodt iy tixe, ltke eeacs...iy...ratn. ttme eo dte.
+
 
 It failed. However, we can guess that the beginning must be *I've*, so we have to change the second
 monoalphabetic cipher (the second letter of the key).
@@ -86,36 +91,39 @@ the letter *E* must be encrypted to *T*.
 We add the argument *--manual* to interact with the decryption:
 
     $ python3 decrypt_polycipher.py -m
-    Introduce the ciphertext: A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd. Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc. H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwätktq Ypsw. Pkd igghd edlwcsk lhda aw anki hf ihet, kazd ltzjh...hf...gzac. Sabd ld cat.
-
-    INFO: Periods guessed using Kasiski's Method [5, 2, 3, 4, 6]
+    Introduce the ciphertext: A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd. Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc. H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwzmhdj Vzlt. Zda szdrw bnetmlh vaak tt kghs ac sabd, dxjw idsgr...ac...qsxm. Lxlw in vxd.
+    
+    INFO: Periods guessed using Kasiski's Method [2, 3, 4, 5, 6]
     INFO: Period with closest IC to English IC: 3
-    INFO: Period with closest IC to ciphertext IC: 2
-    INFO: Periods with confidence: [(3, '30.77%'), (2, '26.15%'), (5, '21.54%'), (4, '10.77%'), (6, '10.77%')]
-
+    INFO: Period with closest IC to ciphertext IC: 3
+    INFO: Periods with confidence: [(3, '41.67%'), (2, '23.33%'), (4, '11.67%'), (5, '11.67%'), (6, '11.67%')]
+    
     Introduce period: 3
-
-    INFO: Subsequence 0. Most common letters: [('W', 7), ('K', 6), ('S', 5), ('H', 5), ('F', 5)]
-
+    
+    INFO: Subsequence 0. Most common letters: [('W', 10), ('A', 7), ('L', 5), ('F', 5), ('K', 4)]
+    
     Encryption of E: W
-
+    
     INFO: Subsequence 0. Key: R <-> 18
-    INFO: Subsequence 1. Most common letters: [('W', 7), ('A', 6), ('K', 5), ('I', 5), ('E', 4)]
-
+    INFO: Subsequence 1. Most common letters: [('I', 7), ('T', 6), ('X', 4), ('H', 4), ('C', 4)]
+    
     Encryption of E: T
-
+    
     INFO: Subsequence 1. Key: O <-> 15
-    INFO: Subsequence 2. Most common letters: [('D', 9), ('H', 8), ('T', 5), ('S', 4), ('N', 4)]
-
+    INFO: Subsequence 2. Most common letters: [('D', 11), ('S', 7), ('N', 6), ('H', 6), ('Z', 4)]
+    
     Encryption of E: D
-
+    
     INFO: Subsequence 2. Key: Y <-> 25
     INFO: Key: ROY
-    INFO: Decrypted text: i've seen things you people wouldn't believe. attack ships on fire off the shoulder of orion. i watched c-beams glitter in the dark near the tannhÄbvuy jqah. qso joril pethdav mpob ih bvvj pq jppu, slal wuhui...pq...hhld. alcl we klu.
-
+    INFO: Decrypted text: i've seen things you people wouldn't believe. attack ships on fire off the shoulder of orion. i watched c-beams glitter in the dark near the tannhauser gate. all those moments will be lost in time, like tears...in...rain. time to die.
+    
     Try another period [y/N]: N
+    --------------
+    INFO: Key: ROY
+    INFO: Decrypted text: i've seen things you people wouldn't believe. attack ships on fire off the shoulder of orion. i watched c-beams glitter in the dark near the tannhauser gate. all those moments will be lost in time, like tears...in...rain. time to die.
 
-We can see now why the automatic mode failed. The letter which *E* must be encrypted to is usually the most common letter in the subsequence but in this case that doesn't applied.
+We can see now why the automatic mode failed. The letter which *E* must be encrypted to is usually the most common letter in the subsequence but in the second subsequence the letter *E* is encrypted to the second most common letter. For that reason the program prints the 5 most common letters.
 
 ## Support
 
