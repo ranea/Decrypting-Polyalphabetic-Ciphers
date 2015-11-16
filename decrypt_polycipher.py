@@ -11,6 +11,7 @@ from math import gcd
 
 ## TODO
 # only vigenere cipher and english supported -> generalize
+# sanitaze input
 
 def cleanText(text):
     """ Removes the punctuation symbol, digits and whitespaces from text """
@@ -203,8 +204,7 @@ def decryptText(text,period,manual=False):
 
         if manual:
             log.info('Subsequence %s. Most common letters: %s',index,most_common_letters)
-            print()
-            encrypted_e = input("Encryption of E: ").upper()
+            encrypted_e = input("\nEncryption of E: ").upper()
             print()
         else:
             encrypted_e = most_common_letter
@@ -356,8 +356,7 @@ if __name__ == '__main__':
 
     else:
         while True:
-            print()
-            guessed_period = int(input("Introduce period: "))
+            guessed_period = int(input("\nIntroduce period: "))
             print()
             key, plaintext = decryptText(clean_ciphertext,guessed_period,manual=True)
             plaintext = rebuildText(ciphertext,plaintext)
@@ -365,8 +364,7 @@ if __name__ == '__main__':
             log.info('Key: %s',key)
             log.info('Decrypted text: %s',plaintext)
 
-            print()
-            option = input("Try another period [y/N]: ")
+            option = input("\nTry another period [y/N]: ")
             if not option.upper() == 'Y':
                 break
 
