@@ -123,7 +123,7 @@ We add the argument *--manual* to interact with the decryption:
     INFO: Key: ROY
     INFO: Decrypted text: i've seen things you people wouldn't believe. attack ships on fire off the shoulder of orion. i watched c-beams glitter in the dark near the tannhauser gate. all those moments will be lost in time, like tears...in...rain. time to die.
 
-We can see now why the automatic mode failed. The letter which *E* must be encrypted to is usually the most common letter in the subsequence but in the second subsequence the letter *E* is encrypted to the second most common letter. For that reason the program prints the 5 most common letters.
+We can see now why the automatic mode failed. The letter which *E* must be encrypted to is usually the most common letter but in the second subsequence the letter *E* is encrypted to the second most common letter. For that reason the program prints the 5 most common letters.
 
 ## Support
 
