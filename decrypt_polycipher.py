@@ -15,10 +15,20 @@ from math import gcd
 def cleanText(text):
     """ Removes the punctuation symbol, digits and whitespaces from text """
     cleantext = text
-    chars_to_removed = string.punctuation + string.whitespace + string.digits + '—'
+    chars_to_removed = [string.punctuation,string.whitespace,string.digits,'—']
+    chars_to_removed = ''.join(chars_to_removed)
     for c in chars_to_removed:
         cleantext = cleantext.replace(c,'')
     return cleantext
+
+def isValidCipherText(text):
+    """ Returns if a text only contains ascii uppercase letters """
+    text_upper = text.upper()
+    for letter in text_upper:
+        if not letter in string.ascii_uppercase:
+            return False
+    else:
+        return True
 
 def rebuildText(originaltext,newtext):
     """ Adds the punctuation symbol, whitespaces and digits from originaltext to newtext
@@ -272,8 +282,9 @@ if __name__ == '__main__':
     clean_ciphertext = cleanText(ciphertext).upper()
     log.debug('Clean ciphertext: %s',clean_ciphertext)
 
-    with open('cleantext.txt1','w') as filehandler:
-        filehandler.write(clean_ciphertext)
+    if not isValidCipherText(clean_ciphertext):
+        log.warning("The ciphertext contains strange characters. Aborting...")
+        sys.exit(1)
 
     ngrams = getNgrams(clean_ciphertext)
     log.debug('n-grams: %s',ngrams)
@@ -297,9 +308,14 @@ if __name__ == '__main__':
         log.warning("Kasiski's method failed: insufficient ngrams. Aborting...")
         sys.exit(1)
 
-    for k,v in all_possible_periods:
-        if v == 1:
-            all_possible_periods.remove((k,v))
+    periods_to_remove = []
+    for period in all_possible_periods:
+        if period[1] == 1:
+            periods_to_remove.append(period)
+
+    if len(all_possible_periods) - len(periods_to_remove) >= 5:
+        for period in periods_to_remove:
+            all_possible_periods.remove(period)
     log.debug('Periods with more occurrences as a factor of distances of ngrams: %s',all_possible_periods)
 
     all_possible_periods_without_occurrences = [a_p_p[0] for a_p_p in all_possible_periods]
@@ -337,6 +353,7 @@ if __name__ == '__main__':
         plaintext = rebuildText(ciphertext,plaintext)
         log.debug('Key: %s',key)
         log.debug('Decrypted text: %s',plaintext)
+
     else:
         while True:
             print()
@@ -353,6 +370,7 @@ if __name__ == '__main__':
             if not option.upper() == 'Y':
                 break
 
+    print("--------------")
     log.info('Key: %s',key)
     if args.output_file:
         log.info('Saving decrypted text in %s.',args.output_file)
