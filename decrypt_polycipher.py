@@ -11,6 +11,8 @@ from math import gcd
 
 ## TODO
 # only vigenere cipher and english supported -> generalize
+#   add spanish ic
+#   improve vigenere usign 5 most common letters
 # sanitaze input
 
 def cleanText(text):
@@ -179,11 +181,12 @@ def guessPeriod(periods_with_occurrences,period_closest_english_ic,period_closes
 
     return periods_with_confidence
 
-def decryptText(text,period,manual=False):
+def decryptText(text,period,manual=False,spanish=False):
     """ Decrypts the text for a given period. For each subsequence
     splited usign the period, the most common letter
     is replaced with the letter E and the key is obtained
-    (supposing the cipher is Vigenère's)
+    (supposing the cipher is Vigenère's).
+    It supposes that the ciphertext is in english by default.
     """
 
     subsequences = [[] for i in range(period)]
@@ -246,13 +249,14 @@ def decryptText(text,period,manual=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="decrypt a polyalphabetic substitution ciphered text")
     parser.add_argument("-m", "--manual", action="store_true", help="interacts with the user")
+    parser.add_argument("-spa", "--spanish", action="store_true", help="suppose the ciphertext is in spanish (english by default")
     parser.add_argument("-i", "--input-file", type=str, help="the input file with the encrypted text")
     parser.add_argument("-o","--output-file", type=str, help="the output file with the decrypted text")
     parser.add_argument("-nc", "--no-colors", action="store_true", help="don't color the output")
     parser.add_argument("-v", "--verbosity", action="store_true", help="increase output verbosity")
     args = parser.parse_args()
 
-    if not args.manual and not args.verbosity and not args.input_file and not args.output_file:
+    if not len(sys.argv) > 1:
         banner = "Note: if you want to read/write from/to a file, print more information or interact "   \
             + "with the decryption, use command-line arguments. For more information, type:"    \
             + "\n\n\tpython3 " + sys.argv[0] + " --help\n"
@@ -326,12 +330,13 @@ if __name__ == '__main__':
         avg_ics.append(averageIndexOfCoincidece(clean_ciphertext,period))
     log.debug('Average IC values: %s',avg_ics)
 
-    english_ic = 0.66895
-    log.debug('English IC: %s',english_ic)
+    language_ic = 0.66895 if not args.spanish else 0.0
+    language = 'English' if not args.spanish else 'Spanish'
+    log.debug('%s IC: %s',language, language_ic)
 
-    pos_element_closest = elementClosestToValue(avg_ics, english_ic)
+    pos_element_closest = elementClosestToValue(avg_ics, language_ic)
     period_closest_english_ic = all_possible_periods_without_occurrences[pos_element_closest]
-    log.info('Period with closest IC to English IC: %s',period_closest_english_ic)
+    log.info('Period with closest IC to %s IC: %s',language, period_closest_english_ic)
 
     ciphertext_ic = indexOfCoincidence(clean_ciphertext)
     log.debug('Ciphertext IC: %s',ciphertext_ic)
@@ -349,7 +354,7 @@ if __name__ == '__main__':
 
     if not args.manual:
         guessed_period = periods_with_confidence[0][0]
-        key, plaintext = decryptText(clean_ciphertext,guessed_period)
+        key, plaintext = decryptText(clean_ciphertext,guessed_period,spanish=args.spanish)
         plaintext = rebuildText(ciphertext,plaintext)
         log.debug('Key: %s',key)
         log.debug('Decrypted text: %s',plaintext)
@@ -358,7 +363,8 @@ if __name__ == '__main__':
         while True:
             guessed_period = int(input("\nIntroduce period: "))
             print()
-            key, plaintext = decryptText(clean_ciphertext,guessed_period,manual=True)
+            key, plaintext = decryptText(clean_ciphertext,guessed_period,manual=True,
+                spanish=args.spanish)
             plaintext = rebuildText(ciphertext,plaintext)
 
             log.info('Key: %s',key)
