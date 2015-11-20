@@ -6,14 +6,16 @@ Decrypting polyalphabetic ciphers using Kasiski's Method and Index of Coincidenc
 
 ## Usage
 
-    usage: decrypt_polycipher.py [-h] [-m] [-i INPUT_FILE] [-o OUTPUT_FILE] [-nc]
-                                 [-v]
+    usage: decrypt_polycipher.py [-h] [-m] [-spa] [-i INPUT_FILE] [-o OUTPUT_FILE]
+                                 [-nc] [-v]
 
     decrypt a polyalphabetic substitution ciphered text
 
     optional arguments:
       -h, --help            show this help message and exit
       -m, --manual          interacts with the user
+      -spa, --spanish       suppose the ciphertext is in Spanish (English by
+                            default
       -i INPUT_FILE, --input-file INPUT_FILE
                             the input file with the encrypted text
       -o OUTPUT_FILE, --output-file OUTPUT_FILE
@@ -61,19 +63,19 @@ We encrypt it using Vigenère's cipher with the key ROY and we obtain:
 
     A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd.
     Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc.
-    H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwzmhdj Vzlt. 
-    Zda szdrw bnetmlh vaak tt kghs ac sabd, dxjw idsgr...ac...qsxm. 
+    H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwzmhdj Vzlt.
+    Zda szdrw bnetmlh vaak tt kghs ac sabd, dxjw idsgr...ac...qsxm.
     Lxlw in vxd.
 
 If we try the automatic decryption:
 
     $ python3 decrypt_polycipher.py
     Note: if you want to read/write from/to a file, print more information or interact with the decryption, use command-line arguments. For more information, type:
-    
+
             python3 decrypt_polycipher.py --help
-    
+
     Introduce the ciphertext: A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd. Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc. H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwzmhdj Vzlt. Zda szdrw bnetmlh vaak tt kghs ac sabd, dxjw idsgr...ac...qsxm. Lxlw in vxd.
-    
+
     INFO: Periods guessed using Kasiski's Method [2, 3, 4, 5, 6]
     INFO: Period with closest IC to English IC: 3
     INFO: Period with closest IC to ciphertext IC: 3
@@ -92,32 +94,32 @@ We add the argument *--manual* to interact with the decryption:
 
     $ python3 decrypt_polycipher.py -m
     Introduce the ciphertext: A'kd ktdf igacfk nnm edgekw lnmacf'i awahwkd. Sissrj kwhhh nf uhjt nxu szt rzdtdsdj de Gghgc. H opsuwdv R-awplk vkaiswg hf igw szjz mwpq lwd Lpmfwzmhdj Vzlt. Zda szdrw bnetmlh vaak tt kghs ac sabd, dxjw idsgr...ac...qsxm. Lxlw in vxd.
-    
+
     INFO: Periods guessed using Kasiski's Method [2, 3, 4, 5, 6]
     INFO: Period with closest IC to English IC: 3
     INFO: Period with closest IC to ciphertext IC: 3
     INFO: Periods with confidence: [(3, '41.67%'), (2, '23.33%'), (4, '11.67%'), (5, '11.67%'), (6, '11.67%')]
-    
+
     Introduce period: 3
-    
+
     INFO: Subsequence 0. Most common letters: [('W', 10), ('A', 7), ('L', 5), ('F', 5), ('K', 4)]
-    
+
     Encryption of E: W
-    
+
     INFO: Subsequence 0. Key: R <-> 18
     INFO: Subsequence 1. Most common letters: [('I', 7), ('T', 6), ('X', 4), ('H', 4), ('C', 4)]
-    
+
     Encryption of E: T
-    
+
     INFO: Subsequence 1. Key: O <-> 15
     INFO: Subsequence 2. Most common letters: [('D', 11), ('S', 7), ('N', 6), ('H', 6), ('Z', 4)]
-    
+
     Encryption of E: D
-    
+
     INFO: Subsequence 2. Key: Y <-> 25
     INFO: Key: ROY
     INFO: Decrypted text: i've seen things you people wouldn't believe. attack ships on fire off the shoulder of orion. i watched c-beams glitter in the dark near the tannhauser gate. all those moments will be lost in time, like tears...in...rain. time to die.
-    
+
     Try another period [y/N]: N
     --------------
     INFO: Key: ROY
@@ -125,7 +127,3 @@ We add the argument *--manual* to interact with the decryption:
 
 We can see now why the automatic mode failed. The letter which *E* must be encrypted to is usually the most common letter but in the second subsequence the letter *E* is encrypted to the second most common letter. For that reason the program prints the 5 most common letters.
 
-## Support
-
-Only English plaintexts and Vigenère's cipher are supported.
-Soon other languages and polyalphabetic ciphers will be added.

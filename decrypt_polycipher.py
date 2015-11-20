@@ -183,10 +183,14 @@ def guessPeriod(periods_with_occurrences,period_closest_english_ic,period_closes
 
 def decryptText(text,period,manual=False,spanish=False):
     """ Decrypts the text for a given period. For each subsequence
-    splited usign the period, the most common letter
+    split using the period, the letter with the highest probability
+    (computed using the most common letters)
     is replaced with the letter E and the key is obtained
     (supposing the cipher is Vigenère's).
-    It supposes that the ciphertext is in english by default.
+    It supposes that the ciphertext is in English by default.
+    If manual is True, the user can choose the
+    encryption of the letter E (which determine the
+    decryption of the whole subsequence)
     """
     log.debug('Using period %s to decrypt',period)
 
@@ -223,7 +227,12 @@ def decryptText(text,period,manual=False,spanish=False):
 
         if manual:
             log.info('Possible encryptions of E with their confidence: %s',encryptions_of_e)
-            encrypted_e = input("\nEncryption of E: ").upper()
+            while True:
+                encrypted_e = input("\nEncryption of E: ").upper()
+                if encrypted_e in string.ascii_letters:
+                    break
+                else:
+                    log.warning("Bad character found. Type a letter.")
             print()
         else:
             log.debug('(subseq=%s) Possible encryptions of E with their confidence: %s',index, encryptions_of_e)
@@ -243,12 +252,6 @@ def decryptText(text,period,manual=False,spanish=False):
         for pos, letter in enumerate(alphabet):
             #log.debug('Enc(%s) = %s',alphabet[(pos-offset)%len(alphabet)],letter)
             subseq_deciphered = subseq_deciphered.replace(letter,alphabet[(pos-offset)%len(alphabet)].lower())
-
-        ## cipher = monoalphabetic substitution
-        # most_common_english_letter = "etrinoa"
-        # n = len(most_common_english_letter)
-        # for cipherletter_with_occurrences,plainletter in zip(frequency_of_letters.most_common(n),most_common_english_letter):
-        #     subseq = subseq.replace(cipherletter_with_occurrences[0] , plainletter)
 
         log.debug('(subseq=%s) Decrypted subsequence: %s',index,subseq_deciphered)
         subsequences_decrypted[index] = subseq_deciphered
@@ -377,10 +380,16 @@ if __name__ == '__main__':
 
     else:
         while True:
-            guessed_period = int(input("\nIntroduce period: "))
+            while True:
+                try:
+                    guessed_period = int(input("\nIntroduce period: "))
+                except ValueError:
+                    log.warning("Bad character found. Type a number")
+                    continue
+                break
             print()
-            key, plaintext = decryptText(clean_ciphertext,guessed_period,manual=True,
-                spanish=args.spanish)
+
+            key, plaintext = decryptText(clean_ciphertext,guessed_period,manual=True, spanish=args.spanish)
             plaintext = rebuildText(ciphertext,plaintext)
 
             log.info('Key: %s',key)
