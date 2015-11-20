@@ -10,9 +10,6 @@ from collections import Counter
 from math import gcd
 
 ## TODO
-# only vigenere cipher and english supported -> generalize
-#   add spanish ic
-#   improve vigenere usign 5 most common letters
 # sanitaze input
 
 def cleanText(text):
@@ -50,9 +47,9 @@ def getNgrams(text):
     """ Gets the n-grams that are repeated in the text.
     The output is a list of list where each (sub)list
     contains all the grams of the same length
-    that are repeated and its occcurrences.
+    that are repeated and its occurrences.
     The list and each (sub)list are sorted in reversed order
-    with respect to the length and the number of occcurrences.
+    with respect to the length and the number of occurrences.
 
     Example:
         >>> getNgrams("abcxabc)
@@ -96,7 +93,6 @@ def KasiskiMethod(text, ngrams):
 def indexOfCoincidence(text):
     """Calculates the index of coincidence of text normalized"""
     frequency_of_letters = Counter(text)
-    log.debug('Frequency of letters: %s', frequency_of_letters)
     ic = 0
     n = len(text)
     for f in frequency_of_letters.values():
@@ -118,10 +114,14 @@ def averageIndexOfCoincidece(text,period):
     for pos,letter in enumerate(text):
         subsequences[pos%period].append(letter)
 
+    subseq_ics = []
     for index,subseq in enumerate(subsequences):
-        log.debug('(p=%s) subsequence %s: %s',period, index,''.join(subseq))
+        ic = indexOfCoincidence(subseq)
+        subseq_ics.append(ic)
+        log.debug('(period=%s) Subsequence %s: %s',period, index,''.join(subseq))
+        log.debug('(period=%s) IC: %s',period, ic)
 
-    avg_ic = sum( [indexOfCoincidence(subseq) for subseq in subsequences] )/period
+    avg_ic = sum(subseq_ics)/period
 
     return float("{0:.6f}".format(avg_ic))
 
@@ -141,8 +141,8 @@ def elementClosestToValue(elements, value, returns_position=True):
     min_value = min(distances_repect_value)
     min_index = distances_repect_value.index(min_value)
 
-    log.debug('Distances respect value: %s',distances_repect_value)
-    log.debug('Element closest to %s is elements[%s]=%s',value,min_index,elements[min_index])
+    #log.debug('Distances respect value: %s',distances_repect_value)
+    #log.debug('Element closest to %s is elements[%s]=%s',value,min_index,elements[min_index])
 
     if returns_position:
         return min_index
@@ -160,22 +160,22 @@ def guessPeriod(periods_with_occurrences,period_closest_english_ic,period_closes
     periods = [period for period,_ in periods_with_occurrences]
     occurrences = [occurrences for _,occurrences in periods_with_occurrences]
     total_occurrences = sum(occurrences)
-    log.debug('Total occcurrences: %s',total_occurrences)
+    log.debug('Total occurrences of all guessed periods: %s',total_occurrences)
 
     periods_with_confidence = []
     for period,occurrences in periods_with_occurrences:
         confidence = 70*occurrences/total_occurrences
         periods_with_confidence.append( [period,confidence] )
-    log.debug('(step=1) Periods with confidence: %s', periods_with_confidence)
+    log.debug('Periods with their confidence using Kasiski: %s', periods_with_confidence)
 
     pos_element_closest = elementClosestToValue(periods, period_closest_english_ic)
     periods_with_confidence[pos_element_closest][1] += 20
-    log.debug('(step=2) Periods with confidence: %s', periods_with_confidence)
+    log.debug('Periods with their confidence using Kasiski and language IC: %s', periods_with_confidence)
 
     pos_element_closest = elementClosestToValue(periods, period_closest_ciphertext_ic)
     periods_with_confidence[pos_element_closest][1] += 10
     periods_with_confidence.sort(key=itemgetter(1),reverse=True)
-    log.debug('(step=3) Periods with confidence: %s', periods_with_confidence)
+    log.debug('Periods with their confidence using Kasiski,language IC and period IC: %s', periods_with_confidence)
 
     periods_with_confidence = [(period,"{0:.2f}%".format(confidence)) for period,confidence in periods_with_confidence]
 
@@ -188,6 +188,7 @@ def decryptText(text,period,manual=False,spanish=False):
     (supposing the cipher is Vigenère's).
     It supposes that the ciphertext is in english by default.
     """
+    log.debug('Using period %s to decrypt',period)
 
     subsequences = [[] for i in range(period)]
     for pos,letter in enumerate(text):
@@ -201,31 +202,46 @@ def decryptText(text,period,manual=False,spanish=False):
         frequency_of_letters = Counter(subseq)
         most_common_letters = frequency_of_letters.most_common(5)
         most_common_letters.sort(key=itemgetter(1,0),reverse=True)
-        most_common_letter = most_common_letters[0][0]
 
-        log.debug('Encrypted subsequence %s: %s',index,subseq)
+        log.debug('(subseq=%s) Encrypted subsequence: %s',index,subseq)
+
+        most_common_letters_of_language = "ETAOI" if spanish == False else "EAOSR"
+        encryptions_of_e = []
+        for index_letter,letter in enumerate(most_common_letters):
+            encrypted_e = most_common_letters[index_letter][0]
+            offset = (ord(encrypted_e) - ord('E'))%len(alphabet)
+            matches = 0
+            for letter in most_common_letters:
+                pos = alphabet.index(letter[0])
+                if alphabet[(pos-offset)%len(alphabet)] in most_common_letters_of_language:
+                    matches += 1
+            encryptions_of_e.append((encrypted_e,matches))
+        encryptions_of_e.sort(key=itemgetter(1),reverse=True)
+        total_matches = sum([matches for letter,matches in encryptions_of_e])
+        encryptions_of_e = [(letter,"{0:.2f}%".format(100*matches/total_matches)) for letter,matches in encryptions_of_e]
+
 
         if manual:
-            log.info('Subsequence %s. Most common letters: %s',index,most_common_letters)
+            log.info('Possible encryptions of E with their confidence: %s',encryptions_of_e)
             encrypted_e = input("\nEncryption of E: ").upper()
             print()
         else:
-            encrypted_e = most_common_letter
-            log.debug('(subsequence=%s) most common letters: %s',index,most_common_letters)
+            log.debug('(subseq=%s) Possible encryptions of E with their confidence: %s',index, encryptions_of_e)
+            encrypted_e = encryptions_of_e[0][0]
 
         offset = (ord(encrypted_e) - ord('E'))%len(alphabet)
-        log.debug('Supposing Enc(E) = %s', encrypted_e)
+        log.debug('(subseq=%s) Supposing Enc(E) = %s', index, encrypted_e)
 
         ## cipher = vigener
         keyletter = chr(ord('A')+offset-1)
         if manual:
-             log.info('Subsequence %s. Key: %s <-> %s', index, keyletter, offset)
+             log.info('Subsequence %s. Key: %s', index, keyletter)
         else:
-            log.debug('Keyletter: %s <-> %s', keyletter, offset)
+            log.debug('(subseq=%s) Keyletter: %s <-> %s', index, keyletter, offset)
 
         subseq_deciphered = subseq
         for pos, letter in enumerate(alphabet):
-            log.debug('Enc(%s) = %s',alphabet[(pos-offset)%len(alphabet)],letter)
+            #log.debug('Enc(%s) = %s',alphabet[(pos-offset)%len(alphabet)],letter)
             subseq_deciphered = subseq_deciphered.replace(letter,alphabet[(pos-offset)%len(alphabet)].lower())
 
         ## cipher = monoalphabetic substitution
@@ -234,7 +250,7 @@ def decryptText(text,period,manual=False,spanish=False):
         # for cipherletter_with_occurrences,plainletter in zip(frequency_of_letters.most_common(n),most_common_english_letter):
         #     subseq = subseq.replace(cipherletter_with_occurrences[0] , plainletter)
 
-        log.debug('Decrypted subsequence %s: %s',index,subseq_deciphered)
+        log.debug('(subseq=%s) Decrypted subsequence: %s',index,subseq_deciphered)
         subsequences_decrypted[index] = subseq_deciphered
         keyword += keyletter
 
@@ -249,7 +265,7 @@ def decryptText(text,period,manual=False,spanish=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="decrypt a polyalphabetic substitution ciphered text")
     parser.add_argument("-m", "--manual", action="store_true", help="interacts with the user")
-    parser.add_argument("-spa", "--spanish", action="store_true", help="suppose the ciphertext is in spanish (english by default")
+    parser.add_argument("-spa", "--spanish", action="store_true", help="suppose the ciphertext is in Spanish (English by default")
     parser.add_argument("-i", "--input-file", type=str, help="the input file with the encrypted text")
     parser.add_argument("-o","--output-file", type=str, help="the output file with the decrypted text")
     parser.add_argument("-nc", "--no-colors", action="store_true", help="don't color the output")
@@ -291,7 +307,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     ngrams = getNgrams(clean_ciphertext)
-    log.debug('n-grams: %s',ngrams)
+    log.debug('All n-grams: %s',ngrams)
 
     if not ngrams:
         log.warning("Kasiski's method failed: no ngrams (n>=3) found. Aborting...")
@@ -320,7 +336,7 @@ if __name__ == '__main__':
     if len(all_possible_periods) - len(periods_to_remove) >= 5:
         for period in periods_to_remove:
             all_possible_periods.remove(period)
-    log.debug('Periods with more occurrences as a factor of distances of ngrams: %s',all_possible_periods)
+    log.debug('Most common periods with their occurrences: %s',all_possible_periods)
 
     all_possible_periods_without_occurrences = [a_p_p[0] for a_p_p in all_possible_periods]
     log.info("Periods guessed using Kasiski's Method %s",all_possible_periods_without_occurrences)
@@ -328,7 +344,7 @@ if __name__ == '__main__':
     avg_ics = []
     for period in all_possible_periods_without_occurrences:
         avg_ics.append(averageIndexOfCoincidece(clean_ciphertext,period))
-    log.debug('Average IC values: %s',avg_ics)
+    log.debug('Average IC values for each guessed period: %s',avg_ics)
 
     language_ic = 0.66895 if not args.spanish else 0.0
     language = 'English' if not args.spanish else 'Spanish'
@@ -343,14 +359,14 @@ if __name__ == '__main__':
 
     periods_ic = [0.0066,0.0520,0.0473,0.0450,0.0436,0.0427,0.0420,0.0415,0.0411,0.0408,
         0.0405,0.0403,0.0402,0.0400,0.0399,0.0397,0.0396,0.0396,0.0395,0.0394 ]
-    log.debug('Periods IC: %s',periods_ic)
+    log.debug('IC related to periods from 1 to 20: %s',periods_ic)
 
     pos_element_closest = elementClosestToValue(periods_ic, ciphertext_ic)
     period_closest_ciphertext_ic = pos_element_closest+1
     log.info('Period with closest IC to ciphertext IC: %s', period_closest_ciphertext_ic)
 
     periods_with_confidence = guessPeriod(all_possible_periods,period_closest_english_ic,period_closest_ciphertext_ic)
-    log.info('Periods with confidence: %s', periods_with_confidence)
+    log.info('Periods with their confidence: %s', periods_with_confidence)
 
     if not args.manual:
         guessed_period = periods_with_confidence[0][0]
@@ -370,7 +386,7 @@ if __name__ == '__main__':
             log.info('Key: %s',key)
             log.info('Decrypted text: %s',plaintext)
 
-            option = input("\nTry another period [y/N]: ")
+            option = input("\nTry again [y/N]: ")
             if not option.upper() == 'Y':
                 break
 
