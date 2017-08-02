@@ -2,7 +2,7 @@
 
 Decrypting polyalphabetic ciphers using Kasiski's Method and Index of Coincidence.
 
-The report [informe.pdf](../blob/master/informe.pdf) (in spanish) explains in details the implementation and contains several examples showing all the funcionalities of the program.
+The report [informe.pdf](informe.pdf) (in spanish) explains in details the implementation and contains several examples showing all the funcionalities of the program.
 
 ## Usage
 
@@ -74,4 +74,4 @@ The program decrypts the ciphertext successfully:
 
 ### Manual mode
 
-Please see the report [informe.pdf](../blob/master/informe.pdf).
+Please see the report [informe.pdf](informe.pdf).
